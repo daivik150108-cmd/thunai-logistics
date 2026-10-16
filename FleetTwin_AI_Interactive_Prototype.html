@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FleetTwin AI | Interactive Prototype</title>
+<style>
+:root{--bg:#f4f7fb;--panel:#fff;--ink:#172b4d;--muted:#64748b;--line:#e2e8f0;--blue:#2563eb;--teal:#0f766e;--green:#15803d;--amber:#b45309;--red:#b91c1c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,Segoe UI,Arial,sans-serif}
+header{background:linear-gradient(120deg,#102a43,#174b70);color:white;padding:24px clamp(16px,4vw,48px)}
+.headerrow{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}.brand{font-size:25px;font-weight:800;letter-spacing:.2px}.brand span{color:#67e8f9}.subtitle{color:#dbeafe;margin-top:6px;font-size:14px}.demo{border:1px solid #7dd3fc;background:#ffffff12;padding:8px 12px;border-radius:999px;font-size:12px}
+main{max-width:1300px;margin:auto;padding:24px clamp(14px,3vw,32px) 44px}
+.notice{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:12px 14px;border-radius:12px;font-size:13px;margin-bottom:18px}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:17px;box-shadow:0 4px 16px #0f172a08}
+.metric-label{font-size:12px;color:var(--muted);font-weight:650;text-transform:uppercase;letter-spacing:.6px}.metric-value{font-size:28px;font-weight:800;margin:8px 0 4px}.metric-note{font-size:12px;color:var(--muted)}
+.layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(300px,.9fr);gap:18px}.section-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 14px;font-size:17px}.section-sub{font-size:12px;color:var(--muted);font-weight:400}
+.pill{display:inline-block;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:750;white-space:nowrap}.high{background:#fee2e2;color:#991b1b}.medium{background:#fef3c7;color:#92400e}.low{background:#dcfce7;color:#166534}.bluepill{background:#dbeafe;color:#1d4ed8}
+table{width:100%;border-collapse:collapse;font-size:13px}th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);background:#f8fafc;padding:11px 9px}td{padding:13px 9px;border-top:1px solid var(--line)}tr[data-id]{cursor:pointer}tr[data-id]:hover,tr.selected{background:#eff6ff}
+button,select{font:inherit}button{border:0;border-radius:10px;background:var(--blue);color:white;padding:10px 13px;font-weight:700;cursor:pointer}button:hover{filter:brightness(.95)}button.secondary{background:#e2e8f0;color:#1e293b}button.approve{background:var(--green)}button:focus,select:focus,input:focus{outline:3px solid #93c5fd;outline-offset:1px}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.field label{display:block;font-size:12px;color:var(--muted);font-weight:700;margin-bottom:6px}.field select,.field input{width:100%;border:1px solid #cbd5e1;border-radius:9px;padding:10px;background:white;color:var(--ink)}
+.scenario-list{display:grid;gap:9px}.scenario{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;justify-content:space-between;gap:12px;align-items:center}.scenario.best{border:2px solid #16a34a;background:#f0fdf4}.scenario h4{margin:0 0 5px;font-size:13px}.scenario p{margin:0;color:var(--muted);font-size:12px;line-height:1.45}.cost{text-align:right;font-weight:800;white-space:nowrap}.cost small{display:block;font-size:11px;color:var(--muted);font-weight:500;margin-top:4px}
+.recommendation{margin-top:13px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px}.recommendation h3{margin:0 0 7px;color:#166534;font-size:15px}.recommendation p{font-size:13px;line-height:1.5;margin:5px 0}.actionrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.status{margin-top:10px;font-size:12px;color:var(--teal);font-weight:700;min-height:17px}
+.bottomgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}.barrow{display:grid;grid-template-columns:110px 1fr 55px;align-items:center;gap:10px;font-size:12px;margin:13px 0}.bar{height:9px;background:#e2e8f0;border-radius:99px;overflow:hidden}.bar span{display:block;height:100%;background:#0f766e;border-radius:99px}
+.event{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}.event:last-child{border-bottom:0}.dot{width:9px;height:9px;border-radius:50%;background:#f59e0b;margin-top:4px;flex:none}.event strong{display:block;margin-bottom:3px}.event small{color:var(--muted)}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:22px}
+@media(max-width:900px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.layout{grid-template-columns:1fr}.bottomgrid{grid-template-columns:1fr}}
+@media(max-width:520px){.metrics{gap:9px}.card{padding:13px}.metric-value{font-size:24px}.controls{grid-template-columns:1fr}table{font-size:12px}th,td{padding:10px 6px}.brand{font-size:22px}}
+</style>
+</head>
+<body>
+<header><div class="headerrow"><div><div class="brand">FleetTwin <span>AI</span></div><div class="subtitle">Fleet operations intelligence · AI prediction + QT optimization + digital twin simulation</div></div><div class="demo">INTERACTIVE DEMO · SAMPLE DATA</div></div></header>
+<main>
+<div class="notice"><strong>Prototype disclaimer:</strong> This demo uses illustrative data and rule-based estimates. It is not connected to live GPS, real fleet systems, or a trained prediction model.</div>
+<section class="metrics">
+ <div class="card"><div class="metric-label">Active vehicles</div><div class="metric-value" id="activeVehicles">24</div><div class="metric-note">Across 6 delivery routes</div></div>
+ <div class="card"><div class="metric-label">At-risk shipments</div><div class="metric-value" id="riskCount">3</div><div class="metric-note">Require operational review</div></div>
+ <div class="card"><div class="metric-label">On-time delivery forecast</div><div class="metric-value" id="onTime">91%</div><div class="metric-note">Illustrative estimate</div></div>
+ <div class="card"><div class="metric-label">Potential cost avoided</div><div class="metric-value" id="savings">₹12,500</div><div class="metric-note">Scenario estimate, not realized savings</div></div>
+</section>
+<div class="layout">
+ <section class="card">
+  <h2 class="section-title">Fleet & shipment status <span class="section-sub">Select a shipment to simulate</span></h2>
+  <div style="overflow-x:auto"><table><thead><tr><th>Vehicle</th><th>Shipment</th><th>ETA</th><th>Deadline</th><th>Risk</th></tr></thead><tbody id="fleetRows"></tbody></table></div>
+  <div class="status" id="selectionStatus">Selected: TRK-104 · SHP-208</div>
+ </section>
+ <section class="card">
+  <h2 class="section-title">What-if simulator <span class="section-sub">QT decision engine</span></h2>
+  <div class="controls">
+   <div class="field"><label for="scenario">Operational event</label><select id="scenario"><option value="breakdown">Vehicle breakdown</option><option value="traffic">Heavy traffic delay</option><option value="capacity">Capacity conflict</option><option value="deadline">Deadline moved earlier</option></select></div>
+   <div class="field"><label for="objective">Optimization priority</label><select id="objective"><option value="balanced">Balanced cost + delivery</option><option value="cost">Minimize extra cost</option><option value="time">Prioritize on-time delivery</option></select></div>
+  </div>
+  <button id="simulateBtn">Simulate alternatives</button>
+  <div id="scenarioResults" class="scenario-list" style="margin-top:13px"></div>
+  <div id="recommendation" class="recommendation"></div>
+  <div class="actionrow"><button class="approve" id="approveBtn">Approve recommendation</button><button class="secondary" id="resetBtn">Reset demo</button></div>
+  <div id="approvalStatus" class="status" aria-live="polite"></div>
+ </section>
+</div>
+<div class="bottomgrid">
+ <section class="card"><h2 class="section-title">QT evaluation factors</h2>
+  <div class="barrow"><span>Deadline feasibility</span><div class="bar"><span style="width:92%"></span></div><strong>92%</strong></div>
+  <div class="barrow"><span>Cost efficiency</span><div class="bar"><span style="width:78%"></span></div><strong>78%</strong></div>
+  <div class="barrow"><span>Vehicle utilization</span><div class="bar"><span style="width:84%"></span></div><strong>84%</strong></div>
+  <div class="barrow"><span>Route feasibility</span><div class="bar"><span style="width:88%"></span></div><strong>88%</strong></div>
+  <p class="section-sub">Illustrative indicator scores for demonstrating the interface; replace with measured values in a real system.</p>
+ </section>
+ <section class="card"><h2 class="section-title">Operational risk feed</h2>
+  <div class="event"><span class="dot" style="background:#dc2626"></span><div><strong>TRK-104 · Breakdown alert</strong><small>Shipment SHP-208 may miss its 6:00 PM deadline.</small></div></div>
+  <div class="event"><span class="dot"></span><div><strong>TRK-112 · Traffic congestion</strong><small>Estimated delay increased by 35 minutes.</small></div></div>
+  <div class="event"><span class="dot" style="background:#0d9488"></span><div><strong>TRK-119 · Capacity available</strong><small>Potential reassignment vehicle within the same region.</small></div></div>
+  <div class="event"><span class="dot" style="background:#64748b"></span><div><strong>System note</strong><small>Manager approval is required before operational changes.</small></div></div>
+ </section>
+</div>
+</main>
+<footer>FleetTwin AI · Concept prototype · All sample figures are illustrative · No real-world action is executed</footer>
+<script>
+const initialFleet = [
+ {id:"TRK-104",shipment:"SHP-208",eta:"6:40 PM",deadline:"6:00 PM",risk:"High",event:"breakdown"},
+ {id:"TRK-112",shipment:"SHP-214",eta:"5:55 PM",deadline:"6:30 PM",risk:"Medium",event:"traffic"},
+ {id:"TRK-119",shipment:"SHP-221",eta:"4:45 PM",deadline:"5:30 PM",risk:"Low",event:"capacity"},
+ {id:"TRK-126",shipment:"SHP-227",eta:"7:10 PM",deadline:"7:00 PM",risk:"High",event:"deadline"},
+ {id:"TRK-131",shipment:"SHP-233",eta:"3:50 PM",deadline:"5:00 PM",risk:"Low",event:""},
+ {id:"TRK-138",shipment:"SHP-241",eta:"6:15 PM",deadline:"6:45 PM",risk:"Medium",event:""}
+];
+let fleet = initialFleet.map(x=>({...x}));
+let selected = "TRK-104";
+let currentRecommendation = "Reroute";
+function renderFleet(){
+ const body=document.getElementById("fleetRows");
+ body.innerHTML=fleet.map(v=>`<tr data-id="${v.id}" class="${v.id===selected?'selected':''}" tabindex="0"><td><strong>${v.id}</strong></td><td>${v.shipment}</td><td>${v.eta}</td><td>${v.deadline}</td><td><span class="pill ${v.risk.toLowerCase()}">${v.risk}</span></td></tr>`).join("");
+ body.querySelectorAll("tr").forEach(row=>{
+  const choose=()=>{selected=row.dataset.id;renderFleet();document.getElementById("selectionStatus").textContent=`Selected: ${selected} · ${fleet.find(v=>v.id===selected).shipment}`;document.getElementById("approvalStatus").textContent="";simulate();};
+  row.addEventListener("click",choose);row.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();choose();}});
+ });
+ document.getElementById("riskCount").textContent=fleet.filter(v=>v.risk!=="Low").length;
+}
+function getOptions(){
+ const event=document.getElementById("scenario").value;
+ const objective=document.getElementById("objective").value;
+ let opts;
+ if(event==="breakdown"){
+  opts=[
+   {name:"Repair and continue",cost:200,eta:"6:40 PM",minutes:40,feasible:false,reason:"Lowest extra cost, but misses the 6:00 PM deadline."},
+   {name:"Reroute",cost:500,eta:"5:50 PM",minutes:-10,feasible:true,reason:"Meets the deadline with moderate extra cost."},
+   {name:"Reassign shipment",cost:700,eta:"5:30 PM",minutes:-30,feasible:true,reason:"Earliest arrival, but uses more resources and costs more."}
+  ];
+ }else if(event==="traffic"){
+  opts=[
+   {name:"Stay on current route",cost:0,eta:"6:30 PM",minutes:30,feasible:false,reason:"No added route cost, but the delivery is late."},
+   {name:"Alternate route",cost:350,eta:"5:55 PM",minutes:-5,feasible:true,reason:"Avoids the congestion and meets the deadline."},
+   {name:"Reassign to nearby vehicle",cost:650,eta:"5:40 PM",minutes:-20,feasible:true,reason:"Can deliver sooner if the replacement vehicle is available."}
+  ];
+ }else if(event==="capacity"){
+  opts=[
+   {name:"Keep current load",cost:0,eta:"5:30 PM",minutes:0,feasible:false,reason:"Exceeds the selected vehicle's assumed capacity."},
+   {name:"Split the shipment",cost:450,eta:"5:20 PM",minutes:-10,feasible:true,reason:"Fits capacity constraints but requires an extra trip."},
+   {name:"Reassign to larger truck",cost:600,eta:"5:15 PM",minutes:-15,feasible:true,reason:"Resolves capacity conflict if a larger truck is available."}
+  ];
+ }else{
+  opts=[
+   {name:"Keep current schedule",cost:0,eta:"6:15 PM",minutes:15,feasible:false,reason:"Misses the newly advanced deadline."},
+   {name:"Reroute",cost:400,eta:"5:50 PM",minutes:-10,feasible:true,reason:"Meets the revised deadline at a moderate cost."},
+   {name:"Reassign shipment",cost:750,eta:"5:35 PM",minutes:-25,feasible:true,reason:"Provides the largest time buffer but costs more."}
+  ];
+ }
+ opts.forEach(o=>o.score=(o.feasible?0:100000)+(objective==="cost"?o.cost:objective==="time"?(o.minutes+60)*10+o.cost*.05:o.cost+Math.max(0,o.minutes)*12));
+ return opts;
+}
+function simulate(){
+ const opts=getOptions();
+ const best=[...opts].sort((a,b)=>a.score-b.score)[0];
+ currentRecommendation=best.name;
+ document.getElementById("scenarioResults").innerHTML=opts.map(o=>`<div class="scenario ${o.name===best.name?'best':''}"><div><h4>${o.name} ${o.name===best.name?'<span class="pill low">Recommended</span>':''}</h4><p>${o.reason}<br>Estimated arrival: ${o.eta} · ${o.feasible?'Deadline feasible':'Constraint violated'}</p></div><div class="cost">₹${o.cost.toLocaleString("en-IN")}<small>extra cost</small></div></div>`).join("");
+ document.getElementById("recommendation").innerHTML=`<h3>Recommended action: ${best.name}</h3><p><strong>Why:</strong> ${best.reason}</p><p><strong>QT result:</strong> ${best.feasible?'Feasible under the demo constraints.':'No fully feasible option found; review the constraints.'} Estimated additional cost: ₹${best.cost.toLocaleString("en-IN")}.</p><p><strong>Manager check:</strong> Confirm vehicle availability, actual route conditions and cost estimates before acting.</p>`;
+ document.getElementById("approvalStatus").textContent="";
+}
+document.getElementById("simulateBtn").addEventListener("click",simulate);
+document.getElementById("scenario").addEventListener("change",simulate);
+document.getElementById("objective").addEventListener("change",simulate);
+document.getElementById("approveBtn").addEventListener("click",()=>{
+ document.getElementById("approvalStatus").textContent=`Demo approval recorded for “${currentRecommendation}”. No real vehicle, route, or shipment has been changed.`;
+});
+document.getElementById("resetBtn").addEventListener("click",()=>{
+ fleet=initialFleet.map(x=>({...x}));selected="TRK-104";
+ document.getElementById("scenario").value="breakdown";document.getElementById("objective").value="balanced";
+ document.getElementById("approvalStatus").textContent="";document.getElementById("selectionStatus").textContent="Selected: TRK-104 · SHP-208";
+ document.getElementById("activeVehicles").textContent="24";document.getElementById("onTime").textContent="91%";document.getElementById("savings").textContent="₹12,500";
+ renderFleet();simulate();
+});
+renderFleet();simulate();
+</script>
+</body>
+</html>
